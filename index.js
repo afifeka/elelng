@@ -3,11 +3,8 @@ const Discord = require("discord.js");
 const cpu = process.cpuUsage().system / 1024 / 1024;
 const used = process.memoryUsage().heapUsed / 1024 / 1024;
 const ms = require("ms");
-const YTDL = require("ytdl-core");
 
 const bot = new Discord.Client({disableEveryone: false});
-
-
 
 bot.on("ready", async () => {
   console.log(`${bot.user.username} is online!`);
@@ -25,6 +22,7 @@ bot.on("message", async message => {
   let messageArray = message.content.split(" ");
   let cmd = messageArray[0];
   let args = messageArray.slice(1);
+
 
   if(cmd === `${prefix}kick`){
 
@@ -198,7 +196,7 @@ bot.on("message", async message => {
     }
   }
   
-    if(cmd === `${prefix}userinfo`){
+  if(cmd === `${prefix}userinfo`){
     const member = message.mentions.members.first() || message.guild.members.get(args[0]) || message.member;
     let embed = new Discord.RichEmbed()
     .setDescription("**USER INFO**")
