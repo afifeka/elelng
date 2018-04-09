@@ -56,7 +56,7 @@ bot.on("message", async message => {
   }
   
   
-    if(cmd === `${prefix}purge`){
+  if(cmd === `${prefix}purge`){
     message.delete()
     if(!message.member.hasPermission("MANAGE_MESSAGES")) return message.reply("Sorry, you don't have a permissions to do this!");
     if(!args[0]) return message.channel.send("Please Give The Number");
@@ -79,3 +79,233 @@ bot.on("message", async message => {
 
     })
   }
+  
+    if (cmd === `${prefix}verify`) {
+     
+      let role = message.guild.roles.find(r => r.name === "⟨ Member ⟩");
+      message.member.addRole(role)
+    
+      if(message.member.roles.has(role.id)) return message.reply("You already have ⟨ Member ⟩ roles!");
+
+      let acceptlaporan = new Discord.RichEmbed()
+      .setAuthor(`${message.author.tag}`, message.author.displayAvatarURL)
+      .setColor(3447003)
+      .setDescription("***COMMANDS***")
+      .addField(`${message.author.tag} Has Verified!`)
+      .setFooter("Ikan | Beta v2.0")
+
+      let modlog = message.guild.channels.find(`name`, "mod-log");
+      if(!modlog) return message.channel.send("Cant Find mod-log Channel.");
+
+      modlog.send(acceptlaporan);
+      message.react("✅");
+
+    }
+
+  if(cmd === `${prefix}ban`){
+
+    let bUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+    if(!bUser) return message.channel.send(":warning: **| Please Tag Player To Be Banned!**");
+    let bReason = args.join(" ").slice(22);
+    if(!message.member.hasPermission("MANAGE_MEMBERS")) return message.channel.send("No can do pal!");
+    if(bUser.hasPermission("MANAGE_MESSAGES")) return message.channel.send(":negative_squared_cross_mark: **| Failed To Banned This Person!**");
+
+    let banEmbed = new Discord.RichEmbed()
+    .setDescription("**BANNED**")
+    .setColor("#f80a0a")
+    .addField(":bust_in_silhouette: | Player Banned", `**${bUser} | ID ${bUser.id}**`)
+    .addField(":bust_in_silhouette: | Banned By", `**<@${message.author.id}> | ID ${message.author.id}**`)
+    .addField(":no_entry: | Reason", bReason);
+
+
+    let modlogchannel = message.guild.channels.find(`name`, "mod-log");
+    if(!modlogchannel) return message.channel.send("No Named Channel `mod-log`.");
+
+    message.guild.member(bUser).ban(bReason);
+    
+    message.delete().catch(O_o=>{});
+    message.channel.send(":white_check_mark:  | **Succes Banned Players**")
+    modlogchannel.send(banEmbed);
+
+
+    return;
+  }
+  
+  
+  if (cmd === `${prefix}stats`){
+    let uptimes = (Math.round(bot.uptime / (1000 * 60 * 60))) + " hours, " + (Math.round(bot.uptime / (1000 * 60)) % 60) + " minutes, and " + (Math.round(bot.uptime / 1000) % 60) + " seconds.\n"
+
+    let testembed = new Discord.RichEmbed()
+    .setDescription("**STATS**")
+    .setColor("#00fa3d")
+    .addField(":mag: | Total Server", `${bot.guilds.size} Servers!`)
+    .addField(":satellite: | Total Channels", `${bot.channels.size} Channels!`)
+    .addField(":busts_in_silhouette: | Total Users", `${bot.users.size.toLocaleString()} Users!`)
+    .addField(":notebook_with_decorative_cover: | Library", "Discord.js")
+    .addField(":bulb: | CPU Usage", `${Math.round(cpu * 100) / 100}%`, true)
+    .addField(":clipboard: |\ Memory Usage", `${Math.round(used * 100) / 100} MB`)
+    .addField(":hourglass_flowing_sand: | Uptime", uptimes)
+    .setFooter("This Command Has Released")
+
+    message.channel.send(testembed);
+  }
+  
+
+  if(cmd === `${prefix}addrole`){
+    if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "MANAGE_ROLES");
+    if (args[0] == "help") {
+      message.reply(":warning: | \nUsage: !addrole [user] [role]");
+      return;
+    }
+    let rMember = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
+    if (!rMember) return errors.cantfindUser(message.channel);
+    let role = args.join(" ").slice(22);
+    if (!role) return message.reply(":bust_in_silhouette: | Specify a role!");
+    let gRole = message.guild.roles.find(`name`, role);
+    if (!gRole) return message.reply(":bust_in_silhouette: | Roles Not Found!");
+  
+    if (rMember.roles.has(gRole.id)) return message.reply("✅ | They Hlready Have That Role!");
+    await (rMember.addRole(gRole.id));
+  
+    try {
+      await rMember.send(`Congrats, You Have Been Given The Role ${gRole.name}`)
+    } catch (e) {
+      console.log(e.stack);
+      message.channel.send(`:tada: | Congrats To <@${rMember.id}>, They Have Been Given The Role ${gRole.name}`)
+    }
+  }
+  
+  if(cmd === `${prefix}removerole`){
+    if (!message.member.hasPermission("MANAGE_ROLES")) return errors.noPerms(message, "MANAGE_ROLES");
+    if(args[0] == "help"){
+      message.reply(":warning: | Usage: !removerole <user> <role>");
+      return;
+    }
+    let rMember = message.guild.member(message.mentions.users.first()) || message.guild.members.get(args[0]);
+    if(!rMember) return message.reply(":warning: | Couldn't Find That User, To.");
+    let role = args.join(" ").slice(22);
+    if(!role) return message.reply(":bust_in_silhouette: | Specify a role");
+    let gRole = message.guild.roles.find(`name`, role);
+    if(!gRole) return message.reply(":bust_in_silhouette: | Roles Not Found!");
+  
+    if(!rMember.roles.has(gRole.id)) return message.reply(":warning: | They Don't Have That Role!");
+    await(rMember.removeRole(gRole.id));
+  
+    try{
+      await rMember.send(`RIP, You Lost The ${gRole.name} Role!`)
+    }catch(e){
+      message.channel.send(`RIP To <@${rMember.id}>`)
+    }
+  }
+  
+    if(cmd === `${prefix}userinfo`){
+    const member = message.mentions.members.first() || message.guild.members.get(args[0]) || message.member;
+    let embed = new Discord.RichEmbed()
+    .setDescription("**USER INFO**")
+    .setColor("#00a6ff")
+    .setImage(member.user.displayAvatarURL)
+    .addField(":bust_in_silhouette: | Player", `${member.user.tag}`)
+    .addField(":shield: | ID", member.id)
+    .addField(":hammer: | Created", member.user.createdAt)
+    .addField(":inbox_tray: | Joined", member.joinedAt);
+
+    message.channel.send(embed);
+    return;
+  }
+
+
+  if(cmd === `${prefix}report`){
+
+    //!report @ned this is the reason
+
+    let rUser = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+    if(!rUser) return message.channel.send(":warning: **| Please Tag Player To Be Report!**");
+    let rreason = args.join(" ").slice(22);
+
+    let reportEmbed = new Discord.RichEmbed()
+    .setDescription("**REPORTS**")
+    .setColor("#f3d804")
+    .addField(":bust_in_silhouette: **| Player**", `**${rUser} | ID: ${rUser.id}**`)
+    .addField(":mag: **| Reason**", rreason)
+    .setFooter("Beta v0.2 | Discord.js");
+
+    let reportschannel = message.guild.channels.find(`name`, "mod-log");
+    if(!reportschannel) return message.channel.send("No Named Channel `mod-log`.");
+
+
+    message.delete().catch(O_o=>{});
+    message.channel.send(":white_check_mark: **| Success Reported The Player!**")
+    reportschannel.send(reportEmbed);
+
+    return;
+  }
+  
+    if(cmd === `${prefix}say`){
+    if(!message.member.hasPermission("ADMINISTRATOR")) return;
+    const sayMessage = message.content.split(" ").slice(1).join(" ");
+    message.delete().catch();
+    message.channel.send(sayMessage);
+  }
+
+
+  if(cmd === `${prefix}afk`){
+    let afkuser = args[1].slice(0);
+
+    message.delete()
+    message.guild.members.get(message.author.id).setNickname("AFK |" + message.author.username);
+    message.channel.send("**:bust_in_silhouette: | User Is Now Afk »** " + `${message.author} ` + `**» ${afkuser}**`)
+
+     return;
+  }
+
+
+  if(cmd === `${prefix}ping`){
+    let pingembed = new Discord.RichEmbed()
+    .setDescription("**Information!**")
+    .setColor("#ffc700")
+    .addField("**Your Ping!**", + message.client.ping)
+    return message.channel.send(pingembed);
+  }
+  
+  if(cmd === `${prefix}tempmute`){
+    let tomute = message.guild.member(message.mentions.users.first() || message.guild.members.get(args[0]));
+    if(!tomute) return message.reply(":bust_in_silhouette: | No Player Wants You Mute!");
+    if(tomute.hasPermission("MANAGE_MESSAGES")) return message.reply(":negative_squared_cross_mark: | Cant Mute Them!");
+    let muterole = message.guild.roles.find(`name`, "muted");
+    //start of create role
+    if(!muterole){
+      try{
+        muterole = await message.guild.createRole({
+          name: "muted",
+          color: "#000000",
+          permissions:[]
+        })
+        message.guild.channels.forEach(async (channel, id) => {
+          await channel.overwritePermissions(muterole, {
+            SEND_MESSAGES: false,
+            ADD_REACTIONS: false
+          });
+        });
+      }catch(e){
+        console.log(e.stack);
+      }
+    }
+    //end of create role
+    let mutetime = args[1];
+    if(!mutetime) return message.reply("You didn't specify a time!");
+  
+    await(tomute.addRole(muterole.id));
+    message.reply(`:white_check_mark: | <@${tomute.id}> Has Been Muted For ${ms(ms(mutetime))}`);
+  
+    setTimeout(function(){
+      tomute.removeRole(muterole.id);
+      message.channel.send(`:hourglass_flowing_sand: | <@${tomute.id}> Has Been Unmuted!`);
+    }, ms(mutetime));
+  }
+  
+});
+  
+  
+
+bot.login(process.env.BOT_TOKEN);
+  
